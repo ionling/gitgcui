@@ -1,29 +1,68 @@
 import flet as ft
 
+import git
+
 
 def main(page: ft.Page):
     page.title = "Flet counter example"
     page.vertical_alignment = ft.MainAxisAlignment.CENTER
 
-    txt_number = ft.TextField(value="0", text_align=ft.TextAlign.RIGHT, width=100)
+    selected_repo = ft.Text()
+    is_git = ft.Checkbox(label="Is Git repo")
+    files_count = ft.TextField(label="Files count", read_only=True)
 
-    def minus_click(e):
-        txt_number.value = str(int(txt_number.value) - 1)
-        page.update()
+    def count_files(e):
+        if not selected_repo.value:
+            files_count.value = "no selected repo"
+        else:
+            files_count.value = git.count_files(selected_repo.value)
+        files_count.update()
 
-    def plus_click(e):
-        txt_number.value = str(int(txt_number.value) + 1)
-        page.update()
+    def handle_pick_repo(e: ft.FilePickerResultEvent):
+        root = git.root(e.path)
+        if root:
+            is_git.value = True
+            selected_repo.value = root
+        else:
+            is_git.value = False
+            selected_repo.value = e.path
 
+        is_git.update()
+        selected_repo.update()
+        files_count.value = ""
+        files_count.update()
+
+    pick_repo_dialog = ft.FilePicker(on_result=handle_pick_repo)
+    page.overlay.append(pick_repo_dialog)
     page.add(
         ft.Row(
             [
-                ft.IconButton(ft.icons.REMOVE, on_click=minus_click),
-                txt_number,
-                ft.IconButton(ft.icons.ADD, on_click=plus_click),
+                ft.ElevatedButton(
+                    "Pick Git repo",
+                    icon=ft.icons.COOKIE,
+                    on_click=lambda _: pick_repo_dialog.get_directory_path(
+                        initial_directory="/home"
+                    ),
+                ),
+                ft.ElevatedButton(
+                    "Count files",
+                    icon=ft.icons.FILE_PRESENT,
+                    on_click=count_files,
+                ),
             ],
             alignment=ft.MainAxisAlignment.CENTER,
-        )
+        ),
+        ft.Row(
+            [is_git, files_count],
+            alignment=ft.MainAxisAlignment.CENTER,
+        ),
+        ft.Row(
+            [
+                ft.Text("Repo path:"),
+                selected_repo,
+            ],
+            alignment=ft.MainAxisAlignment.CENTER,
+        ),
     )
 
 
