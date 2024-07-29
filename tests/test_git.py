@@ -15,6 +15,11 @@ def test_exec_git():
     assert res.returncode == 0
 
 
+def test_gc():
+    assert "fatal: not a git repository" in git.gc("/home")
+    assert not git.gc(".")
+
+
 def test_root_file():
     assert "gitgcui" in git.root("README.md")
     assert not git.root("/home")

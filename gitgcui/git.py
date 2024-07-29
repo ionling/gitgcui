@@ -1,4 +1,5 @@
 import os
+import platform
 import subprocess
 from pathlib import Path
 
@@ -11,6 +12,24 @@ def exec(cmd, cwd=None):
     return subprocess.run(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, text=True
     )
+
+
+def app_open(url):
+    p = platform.system()
+    if p == "Linux":
+        cmd = ["xdg-open", url]
+    else:
+        return f"Not supported platform {p}"
+
+    r = exec(cmd)
+    return r.stderr
+
+
+def gc(path: str) -> str:
+    p = Path(path)
+    dir = p if p.is_dir() else p.parent
+    r = exec(["git", "gc"], dir)
+    return r.stderr
 
 
 def root(path: str) -> str:
