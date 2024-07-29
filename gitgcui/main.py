@@ -16,7 +16,7 @@ class Repo(ft.Container):
         self.path = path
         self.dlg = ft.AlertDialog()
         self.files_count = 0
-        self.files_count_view = ft.Text()
+        self.files_count_view = ft.Text(tooltip="Files count")
 
         self.on_hover = self.handle_on_hover
         self.content = ft.Row(
